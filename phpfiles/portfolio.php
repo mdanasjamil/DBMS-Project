@@ -412,6 +412,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
         header("location:portfolio.php");
     }
     }
+    /***************Transfer********* */
+    if(($POST_['transfer']))
+    {
+        if(($_POST['transfer'])=="Bitcoin"){
+            $id=$_SESSION['studentid'];
+        
+            $sql_update = "SELECT * from crypto_wallet where studentid='$id'";
+            $result_update = mysqli_query($conn, $sql_update);
+            $row_update = mysqli_fetch_assoc($result_update);
+
+            $invcoin=$row_update['bitcoin_investment']+$_POST['transferamnt'];
+            $avgcoinbuy=(($row_update['bitcoin_investment']*$row_update['avg_btc_buyprice'])+($_POST['coin_investment']*$_POST['avg_coin_buyprice']))/$invcoin;
+       
+            $currentinv=$row_update['bitcoin_investment'];
+            $sql_coininv="UPDATE `crypto_wallet` SET `bitcoin_investment` = '$invcoin' WHERE `crypto_wallet`.`studentid` = $id;";
+            $result_coininv=mysqli_query($conn,$sql_coininv);
+
+            $sql_coin_buyp="UPDATE `crypto_wallet` SET `avg_btc_buyprice` = '$avgcoinbuy' WHERE `crypto_wallet`.`studentid` = $id;";
+            $result_coin_buyp=mysqli_query($conn,$sql_coin_buyp);
+
+            header("location:portfolio.php");
+        }
+    }
     }
 ?>
 
@@ -600,13 +623,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
     <div class="transfer">
 
         <button type="button" class="cross-btn-transfer"><i class="fa-solid fa-xmark"></i></button>
-        <form action="">
+        <form action="portfolio.php">
 
             <label for="user">Choose User:</label>
             <input type="text" name="user">
 
             <label for="coin">Choose the coin:</label>
-            <select name="coin" id="coin">
+            <select name="transfer" id="transfer">
                 <option value="Bitcoin" selected>Bitcoin</option>
                 <option value="Ethereum">Ethereum</option>
                 <option value="Tether">Tether</option>
@@ -617,7 +640,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
             </select>
 
             <label for="Transfer-amt">Choose Amount:</label>
-            <input name="Transfer-amt" type="number" class="trade">
+            <input name="transferamnt" type="number" class="trade">
 
             <button class="transfer-btn" value="Transfer">Transfer</button>
         </form>
